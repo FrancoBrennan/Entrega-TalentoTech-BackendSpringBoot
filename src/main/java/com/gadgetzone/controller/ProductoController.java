@@ -1,10 +1,11 @@
 package com.gadgetzone.controller;
 
-import com.gadgetzone.dto.ProductoDTO;
+import com.gadgetzone.dto.ProductoResponseDTO;
 import com.gadgetzone.entity.Producto;
 import com.gadgetzone.service.ProductoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.gadgetzone.dto.*;
 
 import java.util.List;
 
@@ -19,27 +20,37 @@ public class ProductoController {
     }
 
     @PostMapping
-    public ProductoDTO crearProducto(@RequestBody Producto producto) {
+    public ProductoResponseDTO crearProducto(@RequestBody ProductoRequestDTO request) {
+        Producto producto = Producto.builder()
+                .nombre(request.getNombre())
+                .descripcion(request.getDescripcion())
+                .precio(request.getPrecio())
+                .categoria(request.getCategoria())
+                .imagenUrl(request.getImagenUrl())
+                .stock(request.getStock())
+                .build();
+
         Producto guardado = productoService.guardar(producto);
         return mapToDTO(guardado);
     }
 
+
     @GetMapping
-    public List<ProductoDTO> listarProductos() {
+    public List<ProductoResponseDTO> listarProductos() {
         return productoService.listarTodos().stream()
                 .map(this::mapToDTO)
                 .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductoDTO> obtenerProducto(@PathVariable Long id) {
+    public ResponseEntity<ProductoResponseDTO> obtenerProducto(@PathVariable Long id) {
         return productoService.obtenerPorId(id)
                 .map(producto -> ResponseEntity.ok(mapToDTO(producto)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    private ProductoDTO mapToDTO(Producto producto) {
-        return ProductoDTO.builder()
+    private ProductoResponseDTO mapToDTO(Producto producto) {
+        return ProductoResponseDTO.builder()
                 .id(producto.getId())
                 .nombre(producto.getNombre())
                 .descripcion(producto.getDescripcion())

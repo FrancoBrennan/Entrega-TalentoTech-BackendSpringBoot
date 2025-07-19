@@ -3,7 +3,10 @@ package com.gadgetzone.controller;
 import com.gadgetzone.entity.Usuario;
 import com.gadgetzone.service.UsuarioService;
 import org.springframework.web.bind.annotation.*;
-import com.gadgetzone.dto.UsuarioDTO;
+import com.gadgetzone.dto.UsuarioResponseDTO;
+import com.gadgetzone.dto.*;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 
@@ -12,21 +15,33 @@ import java.util.List;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final PasswordEncoder passwordEncoder;
 
-    public UsuarioController(UsuarioService usuarioService) {
+    public UsuarioController(UsuarioService usuarioService, PasswordEncoder passwordEncoder) {
         this.usuarioService = usuarioService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping
-    public UsuarioDTO crear(@RequestBody Usuario usuario) {
+    public UsuarioResponseDTO crear(@RequestBody UsuarioRequestDTO request) {
+        Usuario usuario = Usuario.builder()
+                .nombre(request.getNombre())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .build();
+
         Usuario guardado = usuarioService.guardar(usuario);
-        return new UsuarioDTO(guardado.getId(), guardado.getNombre());
+
+        return UsuarioResponseDTO.builder()
+                .id(guardado.getId())
+                .nombre(guardado.getNombre())
+                .build();
     }
 
     @GetMapping
-    public List<UsuarioDTO> listar() {
+    public List<UsuarioResponseDTO> listar() {
         return usuarioService.listar().stream()
-                .map(u -> new UsuarioDTO(u.getId(), u.getNombre()))
+                .map(u -> new UsuarioResponseDTO(u.getId(), u.getNombre()))
                 .toList();
     }
 }
+

@@ -24,7 +24,9 @@ public class Pedido {
     private String estado; // Por ejemplo: PENDIENTE, ENVIADO, CANCELADO
 
     @ManyToOne
+    @JoinColumn(name = "usuario_id")
     private Usuario usuario;
+
 
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
     private List<LineaPedido> lineas;
