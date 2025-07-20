@@ -106,6 +106,39 @@ public class PedidoService {
         pedidoRepo.deleteById(id);
     }
 
+    public Pedido actualizarLineasPedido(Long id, PedidoUpdateRequestDTO request) {
+        Pedido pedido = pedidoRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+
+        if (request.getLineas() == null || request.getLineas().isEmpty()) {
+            throw new IllegalArgumentException("Debe especificar al menos una línea de pedido");
+        }
+
+        // Limpio líneas actuales
+        pedido.getLineas().clear();
+
+        List<LineaPedido> nuevasLineas = request.getLineas().stream()
+                .map(dto -> {
+                    Producto producto = productoRepo.findById(dto.getProductoId())
+                            .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+                    return LineaPedido.builder()
+                            .producto(producto)
+                            .cantidad(dto.getCantidad())
+                            .subtotal(producto.getPrecio() * dto.getCantidad())
+                            .pedido(pedido)
+                            .build();
+                }).toList();
+
+        pedido.getLineas().addAll(nuevasLineas);
+
+        // Recalcular total
+        double total = nuevasLineas.stream()
+                .mapToDouble(LineaPedido::getSubtotal)
+                .sum();
+        pedido.setTotal(total);
+
+        return pedidoRepo.save(pedido);
+    }
 
 
 }

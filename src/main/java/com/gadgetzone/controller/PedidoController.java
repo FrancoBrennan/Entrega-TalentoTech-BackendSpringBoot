@@ -100,6 +100,15 @@ public class PedidoController {
     }
 
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}/lineas")
+    public ResponseEntity<PedidoResponseDTO> actualizarLineasPedido(
+            @PathVariable Long id,
+            @RequestBody PedidoUpdateRequestDTO request) {
+
+        Pedido actualizado = pedidoService.actualizarLineasPedido(id, request);
+        return ResponseEntity.ok(mapToDTO(actualizado));
+    }
 
 
 
