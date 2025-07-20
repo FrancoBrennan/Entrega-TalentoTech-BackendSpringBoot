@@ -6,6 +6,6 @@ import java.util.List;
 
 @Data
 public class PedidoUpdateRequestDTO {
-    private List<LineaPedidoDTO> lineas;
+    private List<LineaPedidoUpdateDTO> lineas;
 }
 
