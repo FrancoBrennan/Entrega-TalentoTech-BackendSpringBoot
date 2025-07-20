@@ -30,16 +30,22 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public AuthResponse register(RegisterRequestDTO request) {
+        if (usuarioRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("El nombre de usuario ya está en uso");
+        }
+
         Usuario user = Usuario.builder()
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .nombre(request.getNombre())
                 .role(Role.USER)
                 .build();
+
         usuarioRepository.save(user);
         String jwt = jwtService.generateToken(user);
         return AuthResponse.builder().token(jwt).build();
     }
+
 
     public AuthResponse login(LoginRequestDTO request) {
         authenticationManager.authenticate(

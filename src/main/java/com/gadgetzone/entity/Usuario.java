@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import com.gadgetzone.Enum.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
@@ -34,10 +35,9 @@ public class Usuario implements UserDetails {
     private List<Pedido> pedidos;
 
 
-    // Implementación de UserDetails
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(role); // El enum Role implementa GrantedAuthority
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
     @Override

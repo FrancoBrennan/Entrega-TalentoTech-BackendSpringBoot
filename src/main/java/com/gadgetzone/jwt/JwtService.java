@@ -1,5 +1,6 @@
 package com.gadgetzone.jwt;
 
+import com.gadgetzone.entity.Usuario;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -23,22 +24,26 @@ public class JwtService {
     private String secretKey;
 
     public String generateToken(UserDetails userDetails) {
+        Usuario usuario = (Usuario) userDetails;
         return Jwts.builder()
-                .setSubject(userDetails.getUsername())
-                .claim("authorities", userDetails.getAuthorities())
+                .setSubject(String.valueOf(usuario.getId())) // Usamos el ID como subject
+                .claim("authorities", usuario.getAuthorities())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // 24h
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public String extractUsername(String token) {
-        return extractAllClaims(token).getSubject();
+    public Long extractUserId(String token) {
+        return Long.parseLong(extractAllClaims(token).getSubject());
     }
 
+
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        return extractUsername(token).equals(userDetails.getUsername()) && !isTokenExpired(token);
+        Usuario usuario = (Usuario) userDetails;
+        return extractUserId(token).equals(usuario.getId()) && !isTokenExpired(token);
     }
+
 
     private boolean isTokenExpired(String token) {
         return extractAllClaims(token).getExpiration().before(new Date());

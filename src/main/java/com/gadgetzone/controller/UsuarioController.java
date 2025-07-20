@@ -44,11 +44,12 @@ public class UsuarioController {
     }
 
     @PutMapping("/me")
-    public ResponseEntity<UsuarioResponseDTO> actualizarDatosPersonales(@RequestBody UpdateUserRequestDTO request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String usernameActual = auth.getName();
-
-        Usuario actualizado = usuarioService.actualizarDatos(usernameActual, request);
+    public ResponseEntity<UsuarioResponseDTO> actualizarDatosPersonales(
+            @RequestBody UpdateUsuarioRequestDTO request,
+            Authentication authentication
+    ) {
+        Usuario usuario = (Usuario) authentication.getPrincipal();
+        Usuario actualizado = usuarioService.actualizarDatos(usuario.getId(), request);
 
         UsuarioResponseDTO response = UsuarioResponseDTO.builder()
                 .id(actualizado.getId())
@@ -57,6 +58,7 @@ public class UsuarioController {
 
         return ResponseEntity.ok(response);
     }
+
 
     @PutMapping("/me/password")
     @PreAuthorize("isAuthenticated()")

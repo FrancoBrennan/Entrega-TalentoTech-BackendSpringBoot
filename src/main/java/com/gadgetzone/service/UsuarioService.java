@@ -1,9 +1,11 @@
 package com.gadgetzone.service;
 
+import com.gadgetzone.dto.UpdateUsuarioRequestDTO;
 import com.gadgetzone.entity.Usuario;
 import com.gadgetzone.repository.UsuarioRepository;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 
@@ -12,8 +14,11 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepo;
 
-    public UsuarioService(UsuarioRepository usuarioRepo) {
+    private final PasswordEncoder passwordEncoder;
+
+    public UsuarioService(UsuarioRepository usuarioRepo, PasswordEncoder passwordEncoder) {
         this.usuarioRepo = usuarioRepo;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public Usuario guardar(Usuario usuario) {
@@ -28,15 +33,15 @@ public class UsuarioService {
         usuarioRepo.deleteById(id);
     }
 
-    public Usuario actualizarDatos(String usernameActual, UpdateUsuarioRequestDTO request) {
-        Usuario usuario = usuarioRepo.findByUsername(usernameActual)
+    public Usuario actualizarDatos(Long idUsuario, UpdateUsuarioRequestDTO request) {
+        Usuario usuario = usuarioRepo.findById(idUsuario)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
         if (request.getNombre() != null) {
             usuario.setNombre(request.getNombre());
         }
 
-        if (request.getUsername() != null && !request.getUsername().equals(usernameActual)) {
+        if (request.getUsername() != null && !request.getUsername().equals(usuario.getUsername())) {
             if (usuarioRepo.findByUsername(request.getUsername()).isPresent()) {
                 throw new IllegalArgumentException("El nuevo nombre de usuario ya está en uso");
             }
