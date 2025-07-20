@@ -1,5 +1,6 @@
 package com.gadgetzone.entity;
 
+import com.gadgetzone.Enum.EstadoPedido;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,4 +31,5 @@ public class Pedido {
 
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
     private List<LineaPedido> lineas;
+
 }

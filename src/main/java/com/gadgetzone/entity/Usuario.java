@@ -30,6 +30,10 @@ public class Usuario implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Pedido> pedidos;
+
+
     // Implementación de UserDetails
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

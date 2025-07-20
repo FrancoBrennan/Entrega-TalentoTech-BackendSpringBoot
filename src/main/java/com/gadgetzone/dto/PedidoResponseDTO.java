@@ -2,7 +2,6 @@ package com.gadgetzone.dto;
 
 import lombok.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -11,7 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Setter
-public class PedidoDTO {
+public class PedidoResponseDTO {
     private Long id;
     private LocalDateTime fecha;
     private Double total;

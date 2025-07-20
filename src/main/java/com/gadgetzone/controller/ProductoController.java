@@ -4,6 +4,7 @@ import com.gadgetzone.dto.ProductoResponseDTO;
 import com.gadgetzone.entity.Producto;
 import com.gadgetzone.service.ProductoService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.gadgetzone.dto.*;
 
@@ -60,4 +61,23 @@ public class ProductoController {
                 .stock(producto.getStock())
                 .build();
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductoResponseDTO> actualizarProducto(
+            @PathVariable Long id,
+            @RequestBody ProductoRequestDTO request) {
+
+        Producto actualizado = productoService.actualizar(id, request);
+        return ResponseEntity.ok(mapToDTO(actualizado));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarProducto(@PathVariable Long id) {
+        productoService.eliminar(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
 }

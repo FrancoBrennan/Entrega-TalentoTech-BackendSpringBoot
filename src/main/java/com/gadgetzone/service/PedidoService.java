@@ -1,6 +1,7 @@
 package com.gadgetzone.service;
 
 import com.gadgetzone.Auth.AuthService;
+import com.gadgetzone.Enum.EstadoPedido;
 import com.gadgetzone.entity.*;
 import com.gadgetzone.exception.StockInsuficienteException;
 import com.gadgetzone.repository.*;
@@ -9,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
+
 
 @Service
 public class PedidoService {
@@ -44,7 +47,7 @@ public class PedidoService {
             linea.setCantidad(req.getCantidad());
             linea.setSubtotal(producto.getPrecio() * req.getCantidad());
             return linea;
-        }).toList();
+        }).collect(Collectors.toList());
 
         return crearPedido(lineas, usuario);
     }
@@ -85,6 +88,24 @@ public class PedidoService {
     public List<Pedido> obtenerTodos() {
         return pedidoRepo.findAll();
     }
+
+    public Pedido actualizarEstado(Long pedidoId, String nuevoEstado) {
+        Pedido pedido = pedidoRepo.findById(pedidoId)
+                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+
+        try {
+            pedido.setEstado(nuevoEstado.toUpperCase()); // o usar un Enum si lo tipificás
+        } catch (Exception e) {
+            throw new RuntimeException("Estado inválido: " + nuevoEstado);
+        }
+
+        return pedidoRepo.save(pedido);
+    }
+
+    public void eliminar(Long id) {
+        pedidoRepo.deleteById(id);
+    }
+
 
 
 }

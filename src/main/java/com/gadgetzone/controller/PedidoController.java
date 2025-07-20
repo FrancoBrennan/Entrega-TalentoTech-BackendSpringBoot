@@ -24,22 +24,22 @@ public class PedidoController {
     }
 
     @PostMapping
-    public ResponseEntity<PedidoDTO> crearPedido(@RequestBody PedidoRequestDTO request) {
+    public ResponseEntity<PedidoResponseDTO> crearPedido(@RequestBody PedidoRequestDTO request) {
         Usuario usuario = authService.getAuthenticatedUser(); // JWT
         Pedido pedido = pedidoService.crearPedidoDesdeRequest(request.getItems(), usuario);
-        PedidoDTO response = mapToDTO(pedido); // Conversión a DTO
+        PedidoResponseDTO response = mapToDTO(pedido); // Conversión a DTO
         return ResponseEntity.ok(response);
     }
 
 
-
-
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/usuario/{usuarioId}")
     public List<Pedido> pedidosPorUsuario(@PathVariable Long usuarioId) {
         return pedidoService.pedidosPorUsuario(usuarioId);
     }
 
-    private PedidoDTO mapToDTO(Pedido pedido) {
+
+    private PedidoResponseDTO mapToDTO(Pedido pedido) {
         List<LineaPedidoResponseDTO> lineas = pedido.getLineas().stream().map(linea ->
                 LineaPedidoResponseDTO.builder()
                         .nombreProducto(linea.getProducto().getNombre())
@@ -48,7 +48,7 @@ public class PedidoController {
                         .build()
         ).toList();
 
-        return PedidoDTO.builder()
+        return PedidoResponseDTO.builder()
                 .id(pedido.getId())
                 .fecha(pedido.getFecha())
                 .total(pedido.getTotal())
@@ -59,11 +59,11 @@ public class PedidoController {
     }
 
     @GetMapping("/mis-pedidos")
-    public ResponseEntity<List<PedidoDTO>> obtenerMisPedidos() {
+    public ResponseEntity<List<PedidoResponseDTO>> obtenerMisPedidos() {
         Usuario usuario = authService.getAuthenticatedUser();
         List<Pedido> pedidos = pedidoService.obtenerPedidosDeUsuario(usuario);
 
-        List<PedidoDTO> respuesta = pedidos.stream()
+        List<PedidoResponseDTO> respuesta = pedidos.stream()
                 .map(this::mapToDTO)
                 .toList();
 
@@ -72,14 +72,34 @@ public class PedidoController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<PedidoDTO>> obtenerTodosLosPedidos() {
+    public ResponseEntity<List<PedidoResponseDTO>> obtenerTodosLosPedidos() {
         List<Pedido> pedidos = pedidoService.obtenerTodos();
-        List<PedidoDTO> respuesta = pedidos.stream()
+        List<PedidoResponseDTO> respuesta = pedidos.stream()
                 .map(this::mapToDTO)
                 .toList();
 
         return ResponseEntity.ok(respuesta);
     }
+
+    @PutMapping("/{id}/estado")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PedidoResponseDTO> actualizarEstadoPedido(
+            @PathVariable Long id,
+            @RequestBody ActualizarEstadoPedidoRequestDTO request) {
+
+        Pedido actualizado = pedidoService.actualizarEstado(id, request.getEstado());
+        return ResponseEntity.ok(mapToDTO(actualizado));
+    }
+
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarPedido(@PathVariable Long id) {
+        pedidoService.eliminar(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
 
 
 
